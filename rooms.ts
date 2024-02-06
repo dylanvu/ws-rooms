@@ -57,9 +57,15 @@ export class WSRoomManager {
      * broadcast to all sockets in the manager
      * @param {string} data string to broadcast to all sockets in the manager
      */
-    broadcast(data: string) {
+    broadcast(data: string, socket?: WSRMSocket) {
         for (const client of this.server) {
-            client.ws.send(data);
+            if (socket) {
+                if (client.id !== socket.id) {
+                    client.ws.send(data);
+                }
+            } else {
+                client.ws.send(data);
+            }
         }
     }
 
@@ -102,8 +108,10 @@ export class WSRoomManager {
         const room = this.rooms[roomId];
         if (room) {
             for (const client of room) {
-                if (socket && client.id === socket.id) {
-                    client.ws.send(data);
+                if (socket) {
+                    if (client.id !== socket.id) {
+                        client.ws.send(data);
+                    }
                 } else {
                     client.ws.send(data);
                 }
@@ -114,8 +122,6 @@ export class WSRoomManager {
         }
 
     }
-
-    // TODO: broadcast only to a specific user ID
 
     // TODO: return all rooms
 
