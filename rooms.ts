@@ -76,7 +76,7 @@ export class WSRoomManager {
      * @param roomId room id to join or to create
      */
     addSocketToRoom(socket: WSRMSocket, roomId: string) {
-        if (this.rooms[roomId]) {
+        if (this.rooms[roomId] && !this.rooms[roomId].some(sock => sock.id === socket.id)) {
             this.rooms[roomId].push(socket);
         } else {
             this.rooms[roomId] = [socket];
@@ -120,10 +120,11 @@ export class WSRoomManager {
             // do nothing
             console.error(`${roomId} does not exist!`);
         }
-
     }
 
-    // TODO: return all rooms
+    // TODO: emit to all rooms a specific client is part of
+
+    // TODO: retrieve a list of all roomIds a socket is part of
 
     // TODO: list all client ids in a specified rooms
 }

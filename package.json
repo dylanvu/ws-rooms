@@ -2,9 +2,10 @@
   "name": "ws-rooms",
   "version": "1.0.0",
   "description": "A simple wrapper over the ws package with room management and broadcasting system",
-  "main": "index.js",
+  "main": "lib/rooms.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc"
   },
   "author": "",
   "license": "ISC",
