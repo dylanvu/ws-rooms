@@ -37,25 +37,20 @@ export class WSRoomManager {
         // join the list of everything
         this.server.push(newSocket);
 
-        // attach listeners
-        socket.on("close", () => {
-            // when leaving, quit the manager
-            this.remove(newSocket);
-        })
-
         // return the socket object
         return newSocket;
     }
 
     /**
-     * remove socket from jurisdiction 
+     * remove socket from manager
+     * remember to call this on socket close events, else there will be a memory leak/issues!
      * @param socket 
      */
     remove(socket: WSRMSocket) {
-        // TODO: quit all rooms, then remove ID from server client list
         // quit all rooms
         this.kickSocketFromRoom(socket)
-        // remove the ID from the server list
+        // remove the object from the server list
+        this.server.splice(this.server.findIndex(item => item.id === socket.id), 1);
     }
 
     /**
@@ -87,8 +82,13 @@ export class WSRoomManager {
      * @param socket socket object to leave the room
      */
     kickSocketFromRoom(socket: WSRMSocket) {
-        // TODO: figure out what room this client lives in, and removes it.
-        // TODO: scale this up to where a socket can be in multiple rooms?
+        // figure out what room this client lives in, and removes it
+        for (const [_, room] of Object.entries(this.rooms)) {
+            if (room.some(socketInRoom => socketInRoom.id === socket.id)) {
+                // remove it
+                room.splice(room.findIndex(item => item.id === socket.id), 1);
+            }
+        }
     }
 
     /**
@@ -98,12 +98,26 @@ export class WSRoomManager {
      * @param socket optional. If this is defined, this socket will not receive the message
      */
     emitToRoom(roomId: string, data: string, socket?: WSRMSocket) {
+        // get the room
+        const room = this.rooms[roomId];
+        if (room) {
+            for (const client of room) {
+                if (socket && client.id === socket.id) {
+                    client.ws.send(data);
+                } else {
+                    client.ws.send(data);
+                }
+            }
+        } else {
+            // do nothing
+            console.error(`${roomId} does not exist!`);
+        }
 
     }
 
     // TODO: broadcast only to a specific user ID
 
-    // TODO: get all room ids
+    // TODO: return all rooms
 
     // TODO: list all client ids in a specified rooms
 }
